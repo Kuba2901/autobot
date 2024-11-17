@@ -1,0 +1,3 @@
+/home/kuba/control_ws/src/teleop_robot/install/carlikebot/lib/libcarlikebot.so
+/home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/cmake/carlikebotExport.cmake
+/home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/cmake/carlikebotExport-noconfig.cmake

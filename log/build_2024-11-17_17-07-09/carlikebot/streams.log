@@ -1,0 +1,40 @@
+[0.010s] Invoking command in '/home/kuba/control_ws/src/teleop_robot/build/carlikebot': AMENT_PREFIX_PATH=/home/kuba/control_ws/src/teleop_robot/install/ros2_control_demo_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/kuba/control_ws/src/teleop_robot/install/ros2_control_demo_description:/opt/ros/humble /usr/bin/cmake --build /home/kuba/control_ws/src/teleop_robot/build/carlikebot -- -j8 -l8
+[0.067s] [ 50%] [32mBuilding CXX object CMakeFiles/carlikebot.dir/hardware/carlikebot_system.cpp.o[0m
+[4.032s] [100%] [32m[1mLinking CXX shared library libcarlikebot.so[0m
+[4.234s] [100%] Built target carlikebot
+[4.246s] Invoked command in '/home/kuba/control_ws/src/teleop_robot/build/carlikebot' returned '0': AMENT_PREFIX_PATH=/home/kuba/control_ws/src/teleop_robot/install/ros2_control_demo_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/kuba/control_ws/src/teleop_robot/install/ros2_control_demo_description:/opt/ros/humble /usr/bin/cmake --build /home/kuba/control_ws/src/teleop_robot/build/carlikebot -- -j8 -l8
+[4.277s] Invoking command in '/home/kuba/control_ws/src/teleop_robot/build/carlikebot': AMENT_PREFIX_PATH=/home/kuba/control_ws/src/teleop_robot/install/ros2_control_demo_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/kuba/control_ws/src/teleop_robot/install/ros2_control_demo_description:/opt/ros/humble /usr/bin/cmake --install /home/kuba/control_ws/src/teleop_robot/build/carlikebot
+[4.285s] -- Install configuration: ""
+[4.286s] -- Execute custom install script
+[4.286s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot//carlikebot.xml
+[4.296s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/include/carlikebot/carlikebot/carlikebot_system.hpp
+[4.306s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/launch/view_robot.launch.py
+[4.316s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/ros2_control/carlikebot.ros2_control.xacro
+[4.325s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/urdf/carlikebot.urdf.xacro
+[4.334s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/launch/carlikebot.launch.py
+[4.344s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/config/carlikebot_controllers.yaml
+[4.353s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/environment/library_path.sh
+[4.362s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/environment/library_path.dsv
+[4.372s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/ament_index/resource_index/package_run_dependencies/carlikebot
+[4.383s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/ament_index/resource_index/parent_prefix_path/carlikebot
+[4.392s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/environment/ament_prefix_path.sh
+[4.401s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/environment/ament_prefix_path.dsv
+[4.410s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/environment/path.sh
+[4.419s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/environment/path.dsv
+[4.429s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/local_setup.bash
+[4.438s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/local_setup.sh
+[4.448s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/local_setup.zsh
+[4.457s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/local_setup.dsv
+[4.467s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/package.dsv
+[4.477s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/ament_index/resource_index/packages/carlikebot
+[4.486s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/ament_index/resource_index/hardware_interface__pluginlib__plugin/carlikebot
+[4.496s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/cmake/ament_cmake_export_targets-extras.cmake
+[4.505s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/cmake/ament_cmake_export_dependencies-extras.cmake
+[4.514s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/cmake/carlikebotConfig.cmake
+[4.524s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/cmake/carlikebotConfig-version.cmake
+[4.533s] -- Symlinking: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/package.xml
+[4.542s] -- Installing: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/lib/libcarlikebot.so
+[4.543s] -- Set runtime path of "/home/kuba/control_ws/src/teleop_robot/install/carlikebot/lib/libcarlikebot.so" to ""
+[4.544s] -- Installing: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/cmake/carlikebotExport.cmake
+[4.544s] -- Installing: /home/kuba/control_ws/src/teleop_robot/install/carlikebot/share/carlikebot/cmake/carlikebotExport-noconfig.cmake
+[4.547s] Invoked command in '/home/kuba/control_ws/src/teleop_robot/build/carlikebot' returned '0': AMENT_PREFIX_PATH=/home/kuba/control_ws/src/teleop_robot/install/ros2_control_demo_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/kuba/control_ws/src/teleop_robot/install/ros2_control_demo_description:/opt/ros/humble /usr/bin/cmake --install /home/kuba/control_ws/src/teleop_robot/build/carlikebot

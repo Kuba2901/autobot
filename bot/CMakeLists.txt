@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(ros2_control_demo_example_11 LANGUAGES CXX)
+project(carlikebot LANGUAGES CXX)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
   add_compile_options(-Wall -Wextra)
@@ -25,38 +25,38 @@ endforeach()
 
 ## COMPILE
 add_library(
-  ros2_control_demo_example_11
+  carlikebot
   SHARED
   hardware/carlikebot_system.cpp
 )
-target_compile_features(ros2_control_demo_example_11 PUBLIC cxx_std_17)
-target_include_directories(ros2_control_demo_example_11 PUBLIC
+target_compile_features(carlikebot PUBLIC cxx_std_17)
+target_include_directories(carlikebot PUBLIC
 $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/hardware/include>
-$<INSTALL_INTERFACE:include/ros2_control_demo_example_11>
+$<INSTALL_INTERFACE:include/carlikebot>
 )
 ament_target_dependencies(
-  ros2_control_demo_example_11 PUBLIC
+  carlikebot PUBLIC
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 
 # Export hardware plugins
-pluginlib_export_plugin_description_file(hardware_interface ros2_control_demo_example_11.xml)
+pluginlib_export_plugin_description_file(hardware_interface carlikebot.xml)
 
 # INSTALL
 install(
   DIRECTORY hardware/include/
-  DESTINATION include/ros2_control_demo_example_11
+  DESTINATION include/carlikebot
 )
 install(
   DIRECTORY description/launch description/ros2_control description/urdf
-  DESTINATION share/ros2_control_demo_example_11
+  DESTINATION share/carlikebot
 )
 install(
   DIRECTORY bringup/launch bringup/config
-  DESTINATION share/ros2_control_demo_example_11
+  DESTINATION share/carlikebot
 )
-install(TARGETS ros2_control_demo_example_11
-  EXPORT export_ros2_control_demo_example_11
+install(TARGETS carlikebot
+  EXPORT carlikebot
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -71,6 +71,6 @@ if(BUILD_TESTING)
 endif()
 
 ## EXPORTS
-ament_export_targets(export_ros2_control_demo_example_11 HAS_LIBRARY_TARGET)
+ament_export_targets(carlikebot HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 ament_package()
