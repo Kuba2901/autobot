@@ -1,11 +1,17 @@
-#ifndef DIFFDRIVE_ARDUINO_ARDUINO_COMMS_HPP
-#define DIFFDRIVE_ARDUINO_ARDUINO_COMMS_HPP
+// arduino_comm.hpp
+#ifndef CARLIKEBOT_ARDUINO_COMM_HPP_
+#define CARLIKEBOT_ARDUINO_COMM_HPP_
 
-// #include <cstring>
-#include <sstream>
-// #include <cstdlib>
+#include <memory>
+#include <string>
 #include <libserial/SerialPort.h>
+#include "rclcpp/logger.hpp"
+#include <math.h>
+#include <sstream>
 #include <iostream>
+
+
+namespace carlikebot {
 
 
 LibSerial::BaudRate convert_baud_rate(int baud_rate)
@@ -29,12 +35,9 @@ LibSerial::BaudRate convert_baud_rate(int baud_rate)
   }
 }
 
-class ArduinoComms
-{
-
+class ArduinoComm {
 public:
-
-  ArduinoComms() = default;
+  ArduinoComm();
 
   void connect(const std::string &serial_device, int32_t baud_rate, int32_t timeout_ms)
   {  
@@ -43,21 +46,69 @@ public:
     serial_conn_.SetBaudRate(convert_baud_rate(baud_rate));
   }
 
-  void disconnect()
-  {
+  void disconnect() {
+    stopMotors();
     serial_conn_.Close();
   }
 
-  bool connected() const
-  {
+  bool isConnected() const {
     return serial_conn_.IsOpen();
   }
+  
+  // Motor control functions
+  void setSteeringAngle(double angle) {
+    if (!isConnected()) return;
+    
+    int pwm = static_cast<int>(mapToRange(angle, STEERING_MIN, STEERING_MAX, PWM_MIN, PWM_MAX));
+    
+    std::stringstream cmd;
+    cmd << "M," << pwm << ",0,0\n";  // Format: M,<steering_pwm>,0,0
+  }
 
+  void setTractionVelocity(double velocity) {
+    if (!isConnected()) return;
+    // Convert velocity to PWM value and direction
+    int pwm = static_cast<int>(std::abs(mapToRange(velocity, VELOCITY_MIN, VELOCITY_MAX, PWM_MIN, PWM_MAX)));
+    bool forward = velocity >= 0;
+    
+    std::stringstream cmd;
+    cmd << "M,0," << pwm << "," << (forward ? "1" : "0") << "\n";  // Format: M,0,<traction_pwm>,<direction>
+  }
 
-  std::string send_msg(const std::string &msg_to_send, bool print_output = false)
-  {
+  void stopMotors() {
+    if (!isConnected()) return;
+    sendCommand("STOP\n");
+  }
+
+  void initialize() {
+    if (!isConnected()) return;
+    sendCommand("INIT\n");
+  }
+
+  ~ArduinoComm() {
+    if (isConnected()) {
+      disconnect();
+    }
+  }
+
+private:
+  // CONSTANTS
+  static constexpr double STEERING_MIN = -M_PI_2;  // -90 degrees
+  static constexpr double STEERING_MAX = M_PI_2;   // +90 degrees
+  static constexpr double VELOCITY_MIN = -1.0;
+  static constexpr double VELOCITY_MAX = 1.0;
+  static constexpr int PWM_MIN = 0;
+  static constexpr int PWM_MAX = 255;
+
+  // SERIAL CONNECTION PORT
+  LibSerial::SerialPort serial_conn_;
+
+  // CONNECTION TIMEOUT
+  int timeout_ms_;
+
+  std::string sendCommand(const std::string& cmd, bool print_output = false) {
     serial_conn_.FlushIOBuffers(); // Just in case
-    serial_conn_.Write(msg_to_send);
+    serial_conn_.Write(cmd);
 
     std::string response = "";
     try
@@ -72,35 +123,16 @@ public:
 
     if (print_output)
     {
-      std::cout << "Sent: " << msg_to_send << " Recv: " << response << std::endl;
+      std::cout << "Sent: " << cmd << " Recv: " << response << std::endl;
     }
-
     return response;
   }
 
-
-  void send_empty_msg()
-  {
-    std::string response = send_msg("\r");
+  double mapToRange(double x, double in_min, double in_max, double out_min, double out_max) {
+      return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
   }
-  
-  void set_motor_values(int val_1, int val_2)
-  {
-    std::stringstream ss;
-    ss << "m " << val_1 << " " << val_2 << "\r";
-    send_msg(ss.str());
-  }
-
-  void set_pid_values(int k_p, int k_d, int k_i, int k_o)
-  {
-    std::stringstream ss;
-    ss << "u " << k_p << ":" << k_d << ":" << k_i << ":" << k_o << "\r";
-    send_msg(ss.str());
-  }
-
-private:
-    LibSerial::SerialPort serial_conn_;
-    int timeout_ms_;
 };
 
-#endif // DIFFDRIVE_ARDUINO_ARDUINO_COMMS_HPP
+}  // namespace carlikebot
+
+#endif  // CARLIKEBOT_ARDUINO_COMM_HPP_
