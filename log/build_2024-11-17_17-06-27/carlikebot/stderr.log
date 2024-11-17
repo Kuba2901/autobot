@@ -1,7 +1,0 @@
-[01m[K/home/kuba/control_ws/src/teleop_robot/bot/hardware/carlikebot_system.cpp:15:10:[m[K [01;31m[Kfatal error: [m[Kcarlikebot/carlikebot_system.hpp: No such file or directory
-   15 | #include [01;31m[K"carlikebot/carlikebot_system.hpp"[m[K
-      |          [01;31m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
-compilation terminated.
-gmake[2]: *** [CMakeFiles/carlikebot.dir/build.make:76: CMakeFiles/carlikebot.dir/hardware/carlikebot_system.cpp.o] Error 1
-gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/carlikebot.dir/all] Error 2
-gmake: *** [Makefile:146: all] Error 2

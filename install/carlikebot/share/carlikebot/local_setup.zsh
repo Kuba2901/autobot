@@ -1,1 +1,0 @@
-/home/kuba/control_ws/src/teleop_robot/build/carlikebot/ament_cmake_environment_hooks/local_setup.zsh
