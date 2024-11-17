@@ -27,9 +27,6 @@ LibSerial::BaudRate convert_baud_rate(int baud_rate)
   }
 }
 
-ArduinoComm::ArduinoComm(const rclcpp::Logger& logger)
-: logger_(logger) {}
-
 ArduinoComm::~ArduinoComm()
 {
   if (isConnected()) {
@@ -45,10 +42,10 @@ bool ArduinoComm::connect(const std::string& serial_device, int32_t baud_rate, i
     serial_port_.SetBaudRate(convert_baud_rate(baud_rate));
     return true;
   } catch (const std::exception& e) {
-    RCLCPP_ERROR(logger_, "Failed to open serial port: %s", e.what());
+    // RCLCPP_ERROR(logger_, "Failed to open serial port: %s", e.what());
     return false;
   } catch (...) {
-    RCLCPP_ERROR(logger_, "Failed to open serial port: unknown error");
+    // RCLCPP_ERROR(logger_, "Failed to open serial port: unknown error");
     return false;
   }
 }

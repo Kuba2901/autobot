@@ -12,7 +12,7 @@ namespace carlikebot {
 
 class ArduinoComm {
 public:
-  ArduinoComm(const rclcpp::Logger& logger);
+  ArduinoComm() {}
   ~ArduinoComm();
 
   bool connect(const std::string& serial_device, int32_t baud_rate, int32_t timeout_ms);
@@ -30,7 +30,6 @@ private:
   double mapToRange(double x, double in_min, double in_max, double out_min, double out_max);
   
   LibSerial::SerialPort serial_port_;
-  rclcpp::Logger logger_;
   int timeout_ms_;
   
   static constexpr double STEERING_MIN = -M_PI_2;  // -90 degrees

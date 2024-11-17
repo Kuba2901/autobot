@@ -6,8 +6,9 @@
     <ros2_control name="${name}" type="system">
       <hardware>
         <plugin>carlikebot/CarlikeBotSystemHardware</plugin>
-        <param name="example_param_hw_start_duration_sec">0</param>
-        <param name="example_param_hw_stop_duration_sec">3.0</param>
+        <param name="serial_device">/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_858303036393512071F0-if00</param>
+        <param name="baud_rate">57600</param>
+        <param name="timeout_ms">1000</param>
       </hardware>
       <joint name="${prefix}virtual_front_wheel_joint">
         <command_interface name="position"/>

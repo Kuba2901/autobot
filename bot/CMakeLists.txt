@@ -23,10 +23,10 @@ foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
 endforeach()
 
-## COMPILE
 add_library(
   carlikebot
   SHARED
+  hardware/arduino_comms.cpp
   hardware/carlikebot_system.cpp
 )
 target_compile_features(carlikebot PUBLIC cxx_std_17)
@@ -38,6 +38,9 @@ ament_target_dependencies(
   carlikebot PUBLIC
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
+
+target_link_libraries(carlikebot PUBLIC serial)
+
 
 # Export hardware plugins
 pluginlib_export_plugin_description_file(hardware_interface carlikebot.xml)
