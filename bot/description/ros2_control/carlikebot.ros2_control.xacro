@@ -7,7 +7,7 @@
       <hardware>
         <plugin>carlikebot/CarlikeBotSystemHardware</plugin>
         <param name="serial_device">/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_858303036393512071F0-if00</param>
-        <param name="baud_rate">57600</param>
+        <param name="baud_rate">115200</param>
         <param name="timeout_ms">1000</param>
       </hardware>
       <joint name="${prefix}virtual_front_wheel_joint">

@@ -112,7 +112,10 @@ void turnLeft()
 void setSteeringMotor(int pwm) {
   // Determine direction based on PWM value
   if (!pwm)
+  {
+    stopMotors();
     return ;
+  }
   if (pwm > 127)
     turnRight();
   else
@@ -127,12 +130,11 @@ void setTractionMotor(int pwm) {
   int forward;
 
   if (!pwm)
+  {
+    stopMotors();
     return ;
+  }
   forward = pwm < 127 ? 1: 0;
-  Serial.print(pwm);
-  Serial.print(" ");
-  Serial.print(forward);
-  Serial.print('\n');
   if (forward) {
     digitalWrite(TRACTION_IN3, HIGH);
     digitalWrite(TRACTION_IN4, LOW);

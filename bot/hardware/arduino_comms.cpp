@@ -40,6 +40,7 @@ bool ArduinoComm::connect(const std::string& serial_device, int32_t baud_rate, i
     timeout_ms_ = timeout_ms;
     serial_port_.Open(serial_device);
     serial_port_.SetBaudRate(convert_baud_rate(baud_rate));
+    initialize();
     return true;
   } catch (const std::exception& e) {
     // RCLCPP_ERROR(logger_, "Failed to open serial port: %s", e.what());
