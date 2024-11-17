@@ -5,7 +5,6 @@
 
 namespace carlikebot {
 
-
 LibSerial::BaudRate convert_baud_rate(int baud_rate)
 {
   // Just handle some common baud rates
@@ -43,10 +42,8 @@ bool ArduinoComm::connect(const std::string& serial_device, int32_t baud_rate, i
     initialize();
     return true;
   } catch (const std::exception& e) {
-    // RCLCPP_ERROR(logger_, "Failed to open serial port: %s", e.what());
     return false;
   } catch (...) {
-    // RCLCPP_ERROR(logger_, "Failed to open serial port: unknown error");
     return false;
   }
 }
@@ -80,10 +77,18 @@ bool ArduinoComm::setTractionVelocity(double velocity)
 {
   if (!isConnected()) return false;
   
+  // Special case: if velocity is 0, send 0 PWM
+  if (velocity == 0.0) {
+    std::stringstream cmd;
+    cmd << "M,0,0,1\n";  // Send zero PWM, direction doesn't matter
+    return sendCommand(cmd.str());
+  }
+  
   // Convert velocity to PWM value and direction
   int pwm = static_cast<int>(std::abs(mapToRange(velocity, VELOCITY_MIN, VELOCITY_MAX, PWM_MIN, PWM_MAX)));
   bool forward = velocity >= 0;
   
+  std::cout << "Velocity: " << velocity << " PWM: " << pwm << " Forward: " << forward << std::endl;
   std::stringstream cmd;
   cmd << "M,0," << pwm << "," << (forward ? "1" : "0") << "\n";  // Format: M,0,<traction_pwm>,<direction>
   return sendCommand(cmd.str());
@@ -102,24 +107,23 @@ bool ArduinoComm::initialize()
 }
 
 bool ArduinoComm::sendCommand(const std::string &cmd)
+{
+  serial_port_.FlushIOBuffers(); // Just in case
+  serial_port_.Write(cmd);
+
+  std::string response = "";
+  try
   {
-    serial_port_.FlushIOBuffers(); // Just in case
-    serial_port_.Write(cmd);
-
-    std::string response = "";
-    try
-    {
-      // Responses end with \r\n so we will read up to (and including) the \n.
-      serial_port_.ReadLine(response, '\n', timeout_ms_);
-      return (true);
-    }
-    catch (const LibSerial::ReadTimeout&)
-    {
-        std::cerr << "The ReadByte() call has timed out." << std::endl ;
-        return (false);
-    }
+    // Responses end with \r\n so we will read up to (and including) the \n.
+    serial_port_.ReadLine(response, '\n', timeout_ms_);
+    return (response.find("OK") != std::string::npos);
   }
-
+  catch (const LibSerial::ReadTimeout&)
+  {
+    std::cerr << "The ReadByte() call has timed out." << std::endl;
+    return false;
+  }
+}
 
 double ArduinoComm::mapToRange(double x, double in_min, double in_max, double out_min, double out_max)
 {
