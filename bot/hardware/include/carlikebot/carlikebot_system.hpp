@@ -1,111 +1,51 @@
-// Copyright 2021 ros2_control Development Team
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// carlikebot_system.hpp
+#ifndef CARLIKEBOT_SYSTEM_HPP_
+#define CARLIKEBOT_SYSTEM_HPP_
 
-#ifndef carlikebot__CARLIKEBOT_SYSTEM_HPP_
-#define carlikebot__CARLIKEBOT_SYSTEM_HPP_
-
-#include <map>
-#include <memory>
-#include <string>
-#include <utility>
-#include <vector>
-
+#include "hardware_interface/system_interface.hpp"
 #include "hardware_interface/handle.hpp"
 #include "hardware_interface/hardware_info.hpp"
-#include "hardware_interface/system_interface.hpp"
 #include "hardware_interface/types/hardware_interface_return_values.hpp"
-#include "rclcpp/clock.hpp"
-#include "rclcpp/duration.hpp"
-#include "rclcpp/logger.hpp"
 #include "rclcpp/macros.hpp"
-#include "rclcpp/time.hpp"
-#include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "rclcpp_lifecycle/state.hpp"
+#include "carlikebot/arduino_comms.hpp"
 
-namespace carlikebot
-{
-struct JointValue
-{
-  double position{0.0};
-  double velocity{0.0};
-  double effort{0.0};
-};
+namespace carlikebot {
 
-struct Joint
-{
-  explicit Joint(const std::string & name) : joint_name(name)
-  {
-    state = JointValue();
-    command = JointValue();
-  }
-
-  Joint() = default;
-
-  std::string joint_name;
-  JointValue state;
-  JointValue command;
-};
-class CarlikeBotSystemHardware : public hardware_interface::SystemInterface
-{
+class CarlikeBotSystemHardware : public hardware_interface::SystemInterface {
 public:
   RCLCPP_SHARED_PTR_DEFINITIONS(CarlikeBotSystemHardware);
 
-  hardware_interface::CallbackReturn on_init(
-    const hardware_interface::HardwareInfo & info) override;
-
+  hardware_interface::CallbackReturn on_init(const hardware_interface::HardwareInfo & info) override;
+  hardware_interface::CallbackReturn on_configure(const rclcpp_lifecycle::State & previous_state) override;
+  
   std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
-
   std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
 
-  hardware_interface::CallbackReturn on_activate(
-    const rclcpp_lifecycle::State & previous_state) override;
+  hardware_interface::CallbackReturn on_activate(const rclcpp_lifecycle::State & previous_state) override;
+  hardware_interface::CallbackReturn on_deactivate(const rclcpp_lifecycle::State & previous_state) override;
 
-  hardware_interface::CallbackReturn on_deactivate(
-    const rclcpp_lifecycle::State & previous_state) override;
-
-  hardware_interface::return_type read(
-    const rclcpp::Time & time, const rclcpp::Duration & period) override;
-
-  hardware_interface::return_type write(
-    const rclcpp::Time & time, const rclcpp::Duration & period) override;
-
-  /// Get the logger of the SystemInterface.
-  /**
-   * \return logger of the SystemInterface.
-   */
-  rclcpp::Logger get_logger() const { return *logger_; }
-
-  /// Get the clock of the SystemInterface.
-  /**
-   * \return clock of the SystemInterface.
-   */
-  rclcpp::Clock::SharedPtr get_clock() const { return clock_; }
+  hardware_interface::return_type read(const rclcpp::Time & time, const rclcpp::Duration & period) override;
+  hardware_interface::return_type write(const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
 private:
-  // Parameters for the CarlikeBot simulation
-  double hw_start_sec_;
-  double hw_stop_sec_;
+  // Hardware Handles
+  struct Joint {
+    std::string name;
+    double position{0.0};
+    double velocity{0.0};
+    double position_command{0.0};
+    double velocity_command{0.0};
 
-  // Objects for logging
-  std::shared_ptr<rclcpp::Logger> logger_;
-  rclcpp::Clock::SharedPtr clock_;
+    Joint() = default;
+    explicit Joint(const std::string& joint_name) : name(joint_name) {}
+  };
 
-  // std::vector<std::tuple<std::string, double, double>>
-  //   hw_interfaces_;  // name of joint, state, command
-  std::map<std::string, Joint> hw_interfaces_;
+  std::unordered_map<std::string, Joint> joints_;
+  std::unique_ptr<ArduinoComm> arduino_;
+  rclcpp::Logger logger_;
 };
 
 }  // namespace carlikebot
 
-#endif  // ROS2_CONTROL_DEMO_EXAMPLE_11__CARLIKEBOT_SYSTEM_HPP_
+#endif  // CARLIKEBOT_SYSTEM_HPP_
