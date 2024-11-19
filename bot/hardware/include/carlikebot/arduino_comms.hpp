@@ -38,6 +38,10 @@ private:
   static constexpr double VELOCITY_MAX = 1.0;
   static constexpr int PWM_MIN = 0;
   static constexpr int PWM_MAX = 255;
+
+  // Keep track of the current velo / angle state
+  double current_steering_pwm_ = 0.0;
+  double current_traction_pwm_ = 0.0;
 };
 
 }  // namespace carlikebot

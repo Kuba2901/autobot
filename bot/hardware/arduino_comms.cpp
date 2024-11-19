@@ -61,38 +61,49 @@ bool ArduinoComm::isConnected() const
   return serial_port_.IsOpen();
 }
 
+/*
+STEERING PWM VALUES
+0: full left
+127: center
+255: full right
+*/
 bool ArduinoComm::setSteeringAngle(double angle)
 {
+  std::stringstream cmd;
+
   if (!isConnected()) return false;
-  
+
   // Convert angle to PWM value with wider range utilization
   int pwm = static_cast<int>(mapToRange(angle, STEERING_MIN, STEERING_MAX, 0, 255));
   
-  std::stringstream cmd;
+
+  this->current_steering_pwm_ = pwm;
   std::cout << "Angle: " << angle << " PWM: " << pwm << std::endl;
-  cmd << "M," << angle << ",0,0\n";  // Format: M,<steering_pwm>,0,0
+  cmd << "M," << pwm << "," << this->current_traction_velocity_ << "\n";  // // Format: M,<steering_pwm>,<traction_pwm>
   return sendCommand(cmd.str());
 }
 
+/*
+TRACTION PWM VALUES
+0: full reverse
+127: stop
+255: full forward
+*/
 bool ArduinoComm::setTractionVelocity(double velocity)
 {
+  std::stringstream cmd;
+
   if (!isConnected()) return false;
   
-  // Special case: if velocity is 0, send 0 PWM
-  if (std::abs(velocity) < 0.01) {
-    std::stringstream cmd;
-    cmd << "M,0,0,1\n";  // Send zero PWM, direction doesn't matter
-    return sendCommand(cmd.str());
-  }
   
   // Convert velocity to PWM value and direction with stronger scaling
   // Using a higher minimum threshold to ensure movement
   int pwm = static_cast<int>(std::abs(mapToRange(velocity, VELOCITY_MIN, VELOCITY_MAX, 0, 255)));
-  bool forward = velocity >= 0;
   
-  std::stringstream cmd;
+
+  this->current_traction_pwm_ = pwm;
   std::cout << "Velocity: " << velocity << " PWM: " << pwm << " Forward: " << forward << std::endl;
-  cmd << "M,0," << pwm << "," << (forward ? "1" : "0") << "\n";  // Format: M,0,<traction_pwm>,<direction>
+  cmd << "M," << this->current_steering_pwm_ << "," << pwm << "\n";  // Format: M,<steering_pwm>,<traction_pwm>
   return sendCommand(cmd.str());
 }
 bool ArduinoComm::stopMotors()

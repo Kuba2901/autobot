@@ -12,6 +12,12 @@ const int BUFFER_SIZE = 32;
 char buffer[BUFFER_SIZE];
 int buffer_index = 0;
 
+// TRACTION VALUES
+const int TRAC_NEUTRAL = 127;
+
+// STEERING VALUES
+const int STEER_NEUTRAL = 127;
+
 void setup() {
   // Initialize serial communication
   Serial.begin(115200);  // Match the baud rate in ROS2 code
@@ -59,38 +65,38 @@ void processCommand(const char* cmd) {
     stopMotors();
   }
   else if (cmd[0] == 'M') {
-    // Parse motor command: M,<steering_angle>,<traction_pwm>,<traction_direction>
-    int steering_angle = 0;
+    // Parse motor command: M,<steering_angle>,<traction_pwm>
+    int steering_pwm = 0;
     int traction_pwm = 0;
-    int traction_dir = 0;
     
     char* ptr = strchr(cmd, ',');
     if (ptr) {
-      steering_angle = atoi(ptr + 1);
+      steering_pwm = atoi(ptr + 1);
       ptr = strchr(ptr + 1, ',');
       if (ptr) {
         traction_pwm = atoi(ptr + 1);
-        ptr = strchr(ptr + 1, ',');
-        if (ptr) {
-          traction_dir = atoi(ptr + 1);
-        }
       }
     }
     
     // Apply commands to motors
-    setSteeringMotor(steering_angle);
+    setSteeringMotor(steering_pwm);
     setTractionMotor(traction_pwm);
   }
 }
 
-void setSteeringMotor(int angle) {
-  if (!angle)
+void setSteeringMotor(int pwm) {
+  Serial.print("Steer PWM: ");
+  Serial.print(pwm);
+  Serial.print("\n");
+  if (pwm == STEER_NEUTRAL)
   {
+    Serial.println("Going straight");
     // GO STRAIGHT
     digitalWrite(STEERING_IN1, LOW);
     digitalWrite(STEERING_IN2, LOW);
+    return ;
   }
-  if (angle < 0) {
+  if (pwm < STEER_NEUTRAL) {
     // TURN RIGHT
     digitalWrite(STEERING_IN1, HIGH);
     digitalWrite(STEERING_IN2, LOW);
@@ -103,15 +109,18 @@ void setSteeringMotor(int angle) {
   }
 }
 
-void setTractionMotor(int trac) {
-  if (!trac)
+void setTractionMotor(int pwm) {
+  Serial.print("Trac PWM: ");
+  Serial.print(pwm);
+  Serial.print("\n");
+  if (pwm == TRAC_NEUTRAL)
   {
     // STOP THE MOTOR
     digitalWrite(TRACTION_IN3, LOW);
     digitalWrite(TRACTION_IN4, LOW);
     return ;    
   }
-  if (trac > 0)
+  if (pwm < TRAC_NEUTRAL)
   {
     // GO REVERSE
     digitalWrite(TRACTION_IN3, HIGH);
