@@ -63,9 +63,9 @@ bool ArduinoComm::isConnected() const
 
 /*
 STEERING PWM VALUES
-0: full left
+[0-126]: full left
 127: center
-255: full right
+[128-255]: full right
 */
 bool ArduinoComm::setSteeringAngle(double angle)
 {
@@ -76,33 +76,43 @@ bool ArduinoComm::setSteeringAngle(double angle)
   // Convert angle to PWM value with wider range utilization
   int pwm = static_cast<int>(mapToRange(angle, STEERING_MIN, STEERING_MAX, 0, 255));
   
-
-  this->current_steering_pwm_ = pwm;
-  std::cout << "Angle: " << angle << " PWM: " << pwm << std::endl;
-  cmd << "M," << pwm << "," << this->current_traction_velocity_ << "\n";  // // Format: M,<steering_pwm>,<traction_pwm>
+  // Print the values only if it changed
+  if (pwm != this->current_steering_pwm_)
+  {
+    this->current_steering_pwm_ = pwm;
+    std::cout << "Angle: " << angle << " PWM: " << pwm << std::endl;
+  }
+  cmd << "M," << pwm << "," << this->current_traction_pwm_ << "\n";  // // Format: M,<steering_pwm>,<traction_pwm>
   return sendCommand(cmd.str());
 }
 
 /*
 TRACTION PWM VALUES
-0: full reverse
+[0-126]: full reverse
 127: stop
-255: full forward
+[128-255]: full forward
 */
 bool ArduinoComm::setTractionVelocity(double velocity)
 {
   std::stringstream cmd;
+  int pwm;
 
   if (!isConnected()) return false;
   
-  
-  // Convert velocity to PWM value and direction with stronger scaling
-  // Using a higher minimum threshold to ensure movement
-  int pwm = static_cast<int>(std::abs(mapToRange(velocity, VELOCITY_MIN, VELOCITY_MAX, 0, 255)));
-  
 
-  this->current_traction_pwm_ = pwm;
-  std::cout << "Velocity: " << velocity << " PWM: " << pwm << " Forward: " << forward << std::endl;
+  // Extract the PWM value from velocity
+  if (velocity < 0)
+    pwm = 0;
+  else if (velocity > 0)
+    pwm = 255;
+  else
+    pwm = 127;
+
+  if (pwm != this->current_traction_pwm_)
+  {
+    this->current_traction_pwm_ = pwm;
+    std::cout << "Velocity: " << velocity << " PWM: " << pwm << std::endl;
+  }
   cmd << "M," << this->current_steering_pwm_ << "," << pwm << "\n";  // Format: M,<steering_pwm>,<traction_pwm>
   return sendCommand(cmd.str());
 }

@@ -25,6 +25,9 @@ public:
   bool stopMotors();
   bool initialize();
 
+  // ARDUINO MOTOR VALUES
+  static constexpr double NEUTRAL_PWM = 127;
+
 private:
   bool sendCommand(const std::string& cmd);
   double mapToRange(double x, double in_min, double in_max, double out_min, double out_max);
