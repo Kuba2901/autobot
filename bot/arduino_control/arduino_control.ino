@@ -1,11 +1,11 @@
 // Pin definitions for L298N motor driver
-// const int STEERING_ENA = 5;  // PWM pin for steering motor speed
-const int STEERING_IN1 = 4;  // Direction pin 1 for steering motor
+const int STEERING_ENA = 9;  // PWM pin for steering motor speed
+const int STEERING_IN1 = 2;  // Direction pin 1 for steering motor
 const int STEERING_IN2 = 3;  // Direction pin 2 for steering motor
 
-// const int TRACTION_ENB = 6;  // PWM pin for traction motor speed
-const int TRACTION_IN3 = 8;  // Direction pin 1 for traction motor
-const int TRACTION_IN4 = 7;  // Direction pin 2 for traction motor
+const int TRACTION_ENB = 10;  // PWM pin for traction motor speed
+const int TRACTION_IN3 = 4;  // Direction pin 1 for traction motor
+const int TRACTION_IN4 = 5;  // Direction pin 2 for traction motor
 
 // Serial communication
 const int BUFFER_SIZE = 32;
@@ -18,15 +18,18 @@ const int TRAC_NEUTRAL = 127;
 // STEERING VALUES
 const int STEER_NEUTRAL = 127;
 
+// Minimal PWM on the motors
+const int MIN_MOTOR_THRESHOLD = 160;
+
 void setup() {
   // Initialize serial communication
   Serial.begin(115200);  // Match the baud rate in ROS2 code
   
   // Configure motor control pins
-  // pinMode(STEERING_ENA, OUTPUT);
+  pinMode(STEERING_ENA, OUTPUT);
   pinMode(STEERING_IN1, OUTPUT);
   pinMode(STEERING_IN2, OUTPUT);
-  // pinMode(TRACTION_ENB, OUTPUT);
+  pinMode(TRACTION_ENB, OUTPUT);
   pinMode(TRACTION_IN3, OUTPUT);
   pinMode(TRACTION_IN4, OUTPUT);
   
@@ -94,18 +97,21 @@ void setSteeringMotor(int pwm) {
     // GO STRAIGHT
     digitalWrite(STEERING_IN1, LOW);
     digitalWrite(STEERING_IN2, LOW);
+    analogWrite(STEERING_ENA, 0);
     return ;
   }
   if (pwm < STEER_NEUTRAL) {
     // TURN RIGHT
+    pwm = map(pwm, 0, 127, 0, 255);
     digitalWrite(STEERING_IN1, HIGH);
     digitalWrite(STEERING_IN2, LOW);
-    // analogWrite(STEERING_ENA, map(pwm, 0, 127, 255, 0));
+    analogWrite(STEERING_ENA, pwm);
   } else {
     // TURN LEFT
+    pwm = map(pwm, 128, 255, 0, 255);
     digitalWrite(STEERING_IN1, LOW);
     digitalWrite(STEERING_IN2, HIGH);
-    // analogWrite(STEERING_ENA, map(pwm, 128, 255, 0, 255));
+    analogWrite(STEERING_ENA, pwm);
   }
 }
 
@@ -118,31 +124,35 @@ void setTractionMotor(int pwm) {
     // STOP THE MOTOR
     digitalWrite(TRACTION_IN3, LOW);
     digitalWrite(TRACTION_IN4, LOW);
+    analogWrite(TRACTION_ENB, 0);
     return ;    
   }
   if (pwm < TRAC_NEUTRAL)
   {
     // GO REVERSE
+    pwm = map(pwm, 0, 127, 0, 255);
     digitalWrite(TRACTION_IN3, HIGH);
     digitalWrite(TRACTION_IN4, LOW);
+    analogWrite(TRACTION_ENB, pwm);
   }
   else
   {
     // GO FORWARD
+    pwm = map(pwm, 128, 255, 0, 255);
     digitalWrite(TRACTION_IN3, LOW);
     digitalWrite(TRACTION_IN4, HIGH);
+    analogWrite(TRACTION_ENB, pwm);
   }
-  // analogWrite(TRACTION_ENB, pwm);
 }
 
 void stopMotors() {
   // Stop steering motor
   digitalWrite(STEERING_IN1, LOW);
   digitalWrite(STEERING_IN2, LOW);
-  // analogWrite(STEERING_ENA, 0);
+  analogWrite(STEERING_ENA, 0);
   
   // Stop traction motor
   digitalWrite(TRACTION_IN3, LOW);
   digitalWrite(TRACTION_IN4, LOW);
-  // analogWrite(TRACTION_ENB, 0);
+  analogWrite(TRACTION_ENB, 0);
 }

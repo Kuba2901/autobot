@@ -1,65 +1,46 @@
-#!/usr/bin/env python3
-
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist, TwistStamped
 from sensor_msgs.msg import Joy
+from geometry_msgs.msg import TwistStamped
 
-class PS4TwistBridgeNode(Node):
+class PS4ControllerNode(Node):
     def __init__(self):
-        super().__init__('ps4_twist_bridge_node')
+        super().__init__('ps4_controller_node')
         
-        # Parameters for control scaling
-        self.linear_scale = 1.0   # Max linear velocity
-        self.angular_scale = 1.0  # Max angular velocity
+        # Subscription to the /joy topic for PS4 controller input
+        self.joy_sub = self.create_subscription(Joy, '/joy', self.joy_callback, 10)
         
-        # Create subscription to joy topic
-        self.joy_sub = self.create_subscription(
-            Joy,
-            '/joy',  # Topic published by joy_node
-            self.joy_callback,
-            10
-        )
+        # Publisher for the bicycle steering controller
+        self.cmd_pub = self.create_publisher(TwistStamped, '/bicycle_steering_controller/reference', 10)
         
-        # Create publisher for TwistStamped messages
-        self.twist_pub = self.create_publisher(
-            TwistStamped,
-            '/bicycle_steering_controller/reference',
-            10
-        )
+        # Timer to publish at a fixed rate (30 Hz)
+        self.timer = self.create_timer(1.0 / 30, self.publish_cmd)
         
-        # Initialize message
-        self.twist_stamped = TwistStamped()
-        
-        self.get_logger().info('PS4 Twist Bridge Node started')
+        # Initialize storage for joystick input
+        self.current_linear_x = 0.0
+        self.current_angular_z = 0.0
 
     def joy_callback(self, msg):
-        """
-        PS4 controller mapping:
-        Left stick up/down: Linear velocity (msg.axes[1])
-        Right stick left/right: Angular velocity (msg.axes[2])
-        """
-        # Create and fill TwistStamped message
-        self.twist_stamped.header.stamp = self.get_clock().now().to_msg()
-        
-        # Linear velocity (left stick up/down)
-        self.twist_stamped.twist.linear.x = msg.axes[1] * self.linear_scale
-        self.twist_stamped.twist.linear.y = 0.0
-        self.twist_stamped.twist.linear.z = 0.0
-        
-        # Angular velocity (right stick left/right)
-        self.twist_stamped.twist.angular.x = 0.0
-        self.twist_stamped.twist.angular.y = 0.0
-        self.twist_stamped.twist.angular.z = msg.axes[2] * self.angular_scale
-        
-        # Publish the message
-        self.twist_pub.publish(self.twist_stamped)
+        # Map joystick axes to linear and angular velocities
+        self.current_linear_x = msg.axes[1] * 1.0  # Left joystick vertical (scaled to 1.0 m/s max)
+        self.current_angular_z = msg.axes[0] * 1.0  # Left joystick horizontal (scaled to 1.0 rad/s max)
+
+    def publish_cmd(self):
+        # Create and publish a TwistStamped message
+        twist_stamped = TwistStamped()
+        twist_stamped.twist.linear.x = self.current_linear_x
+        twist_stamped.twist.linear.y = 0.0
+        twist_stamped.twist.linear.z = 0.0
+        twist_stamped.twist.angular.x = 0.0
+        twist_stamped.twist.angular.y = 0.0
+        twist_stamped.twist.angular.z = self.current_angular_z
+
+        self.cmd_pub.publish(twist_stamped)
 
 def main(args=None):
     rclpy.init(args=args)
-    node = PS4TwistBridgeNode()
+    node = PS4ControllerNode()
     rclpy.spin(node)
-    node.destroy_node()
     rclpy.shutdown()
 
 if __name__ == '__main__':
