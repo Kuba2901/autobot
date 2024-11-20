@@ -1,26 +1,16 @@
-# Copyright 2020 ros2_control Development Team
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
+import os
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, RegisterEventHandler
 from launch.conditions import IfCondition, UnlessCondition
 from launch.event_handlers import OnProcessExit
-from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, FindExecutable, PathJoinSubstitution, LaunchConfiguration
 
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
@@ -30,7 +20,7 @@ def generate_launch_description():
         DeclareLaunchArgument(
             "gui",
             default_value="true",
-            description="Start RViz2 automatically with this launch file.",
+            description="Start Gazebo with GUI.",
         )
     )
     declared_arguments.append(
@@ -64,15 +54,20 @@ def generate_launch_description():
             "carlikebot_controllers.yaml",
         ]
     )
-    rviz_config_file = PathJoinSubstitution(
-        [
-            FindPackageShare("ros2_control_demo_description"),
-            "carlikebot/rviz",
-            "carlikebot.rviz",
-        ]
-    )
 
-    # Controllers and RViz
+    # Gazebo Simulation
+        # Include the Gazebo launch file, provided by the gazebo_ros package
+    gazebo = IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([os.path.join(
+                    get_package_share_directory('gazebo_ros'), 'launch', 'gazebo.launch.py')]),
+             )
+
+    # Run the spawner node from the gazebo_ros package. The entity name doesn't really matter if you only have a single robot.
+    spawn_entity = Node(package='gazebo_ros', executable='spawn_entity.py',
+                        arguments=['-topic', 'robot_description',
+                                   '-entity', 'my_bot'],
+                        output='screen')
+
     control_node_remapped = Node(
         package="controller_manager",
         executable="ros2_control_node",
@@ -94,19 +89,12 @@ def generate_launch_description():
         ],
         condition=UnlessCondition(remap_odometry_tf),
     )
+
     robot_state_pub_bicycle_node = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
         output="both",
         parameters=[robot_description],
-    )
-    rviz_node = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        output="log",
-        arguments=["-d", rviz_config_file],
-        condition=IfCondition(gui),
     )
 
     joint_state_broadcaster_spawner = Node(
@@ -121,14 +109,6 @@ def generate_launch_description():
         arguments=["bicycle_steering_controller", "--controller-manager", "/controller_manager"],
     )
 
-    # Delay rviz start after `joint_state_broadcaster`
-    delay_rviz_after_joint_state_broadcaster_spawner = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_action=joint_state_broadcaster_spawner,
-            on_exit=[rviz_node],
-        )
-    )
-
     # Delay start of joint_state_broadcaster after `robot_controller`
     delay_joint_state_broadcaster_after_robot_controller_spawner = RegisterEventHandler(
         event_handler=OnProcessExit(
@@ -137,30 +117,14 @@ def generate_launch_description():
         )
     )
 
-    # Include PS4 Twist Bridge
-    ps4_bridge_node = Node(
-        package='carlikebot',
-        executable='ps4_twist_bridge.py',
-        output='screen',
-    )
-
-    # Run the Joy node
-    joy_node = Node(
-        package='joy',
-        executable='joy_node',
-        output='screen',
-    )
-
-
     nodes = [
         control_node,
         control_node_remapped,
         robot_state_pub_bicycle_node,
+        gazebo,
+        spawn_entity,
         robot_bicycle_controller_spawner,
         delay_joint_state_broadcaster_after_robot_controller_spawner,
-        delay_rviz_after_joint_state_broadcaster_spawner,
-        ps4_bridge_node,
-        joy_node
     ]
 
     return LaunchDescription(declared_arguments + nodes)

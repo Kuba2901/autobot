@@ -73,15 +73,14 @@ bool ArduinoComm::setSteeringAngle(double angle)
 
   if (!isConnected()) return false;
 
+  std::cout << "Angle: " << angle << "\n";
   // Convert angle to PWM value with wider range utilization
   int pwm = static_cast<int>(mapToRange(angle, STEERING_MIN, STEERING_MAX, 0, 255));
   
   // Print the values only if it changed
   if (pwm != this->current_steering_pwm_)
-  {
     this->current_steering_pwm_ = pwm;
-    std::cout << "Angle: " << angle << " PWM: " << pwm << std::endl;
-  }
+  std::cout << "M," << pwm << "," << this->current_traction_pwm_ << "\n";
   cmd << "M," << pwm << "," << this->current_traction_pwm_ << "\n";  // // Format: M,<steering_pwm>,<traction_pwm>
   return sendCommand(cmd.str());
 }
@@ -95,24 +94,15 @@ TRACTION PWM VALUES
 bool ArduinoComm::setTractionVelocity(double velocity)
 {
   std::stringstream cmd;
-  int pwm;
-
   if (!isConnected()) return false;
   
 
+  std::cout << "Velocity: " << velocity << "\n";
   // Extract the PWM value from velocity
-  if (velocity < 0)
-    pwm = 0;
-  else if (velocity > 0)
-    pwm = 255;
-  else
-    pwm = 127;
-
+  int pwm = static_cast<int>(mapToRange(velocity, VELOCITY_MIN, VELOCITY_MAX, 0, 255));
   if (pwm != this->current_traction_pwm_)
-  {
     this->current_traction_pwm_ = pwm;
-    std::cout << "Velocity: " << velocity << " PWM: " << pwm << std::endl;
-  }
+  std::cout << "M," << this->current_steering_pwm_ << "," << pwm << "\n";
   cmd << "M," << this->current_steering_pwm_ << "," << pwm << "\n";  // Format: M,<steering_pwm>,<traction_pwm>
   return sendCommand(cmd.str());
 }

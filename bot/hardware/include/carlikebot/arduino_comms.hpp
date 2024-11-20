@@ -35,10 +35,10 @@ private:
   LibSerial::SerialPort serial_port_;
   int timeout_ms_;
   
-  static constexpr double STEERING_MIN = -M_PI_2;  // -90 degrees
-  static constexpr double STEERING_MAX = M_PI_2;   // +90 degrees
-  static constexpr double VELOCITY_MIN = -1.0;
-  static constexpr double VELOCITY_MAX = 1.0;
+  static constexpr double VELOCITY_MIN = -20.0;
+  static constexpr double VELOCITY_MAX = 20.0;
+  static constexpr double STEERING_MIN = -0.314;
+  static constexpr double STEERING_MAX = 0.314;
   static constexpr int PWM_MIN = 0;
   static constexpr int PWM_MAX = 255;
 

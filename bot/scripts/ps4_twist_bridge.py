@@ -22,7 +22,9 @@ class PS4ControllerNode(Node):
 
     def joy_callback(self, msg):
         # Map joystick axes to linear and angular velocities
-        self.current_linear_x = msg.axes[1] * 1.0  # Left joystick vertical (scaled to 1.0 m/s max)
+        r2_value = msg.axes[5] * -1.0
+        l2_value = msg.axes[2] * -1.0
+        self.current_linear_x = (r2_value - l2_value) / 2
         self.current_angular_z = msg.axes[0] * 1.0  # Left joystick horizontal (scaled to 1.0 rad/s max)
 
     def publish_cmd(self):

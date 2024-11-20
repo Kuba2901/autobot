@@ -102,7 +102,7 @@ void setSteeringMotor(int pwm) {
   }
   if (pwm < STEER_NEUTRAL) {
     // TURN RIGHT
-    pwm = map(pwm, 0, 127, 0, 255);
+    pwm = (STEER_NEUTRAL - pwm) * 2;
     digitalWrite(STEERING_IN1, HIGH);
     digitalWrite(STEERING_IN2, LOW);
     analogWrite(STEERING_ENA, pwm);
@@ -130,7 +130,7 @@ void setTractionMotor(int pwm) {
   if (pwm < TRAC_NEUTRAL)
   {
     // GO REVERSE
-    pwm = map(pwm, 0, 127, 0, 255);
+    pwm = (STEER_NEUTRAL - pwm) * 2;
     digitalWrite(TRACTION_IN3, HIGH);
     digitalWrite(TRACTION_IN4, LOW);
     analogWrite(TRACTION_ENB, pwm);

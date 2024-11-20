@@ -58,6 +58,13 @@ install(
   DIRECTORY bringup/launch bringup/config
   DESTINATION share/carlikebot
 )
+
+install(
+  DIRECTORY scripts/
+  DESTINATION lib/${PROJECT_NAME}
+  USE_SOURCE_PERMISSIONS
+)
+
 install(TARGETS carlikebot
   EXPORT carlikebot
   ARCHIVE DESTINATION lib
