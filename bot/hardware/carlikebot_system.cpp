@@ -256,6 +256,7 @@ hardware_interface::return_type carlikebot ::CarlikeBotSystemHardware::write(
     return hardware_interface::return_type::ERROR;
   }
 
+  std::cout << "Steering position: " << hw_interfaces_["steering"].command.position << std::endl;
   arduino_comm_.setSteeringAngle(hw_interfaces_["steering"].command.position);
   arduino_comm_.setTractionVelocity(hw_interfaces_["traction"].command.velocity);
   return hardware_interface::return_type::OK;
