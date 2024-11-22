@@ -52,6 +52,7 @@ void ArduinoComm::disconnect()
 {
   if (serial_port_.IsOpen()) {
     stopMotors();
+    sendCommand("DISCONNECT");
     serial_port_.Close();
   }
 }
