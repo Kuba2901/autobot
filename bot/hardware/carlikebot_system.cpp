@@ -218,16 +218,24 @@ hardware_interface::CallbackReturn CarlikeBotSystemHardware::on_activate(
   }
 
   // LIGHTS
-  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("light_control_node");
-  light_command_subscription_ = node->create_subscription<std_msgs::msg::String>(
-    "light_command", // Topic name
-    10, // Queue size
+  is_running_ = true;
+  light_control_node_ = rclcpp::Node::make_shared("light_control_node");
+  
+  light_command_subscription_ = light_control_node_->create_subscription<std_msgs::msg::String>(
+    "light_command",
+    10,
     std::bind(&CarlikeBotSystemHardware::light_command_callback, this, std::placeholders::_1)
   );
-  rclcpp::spin(node);
 
-  RCLCPP_INFO(node->get_logger(), "Subscribed to light_command topic");
+  // Start spinning in a separate thread
+  spin_thread_ = std::thread([this]() {
+    while (is_running_ && rclcpp::ok()) {
+      rclcpp::spin_some(light_control_node_);
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));  // Add small sleep to prevent CPU overuse
+    }
+  });
 
+  RCLCPP_INFO(light_control_node_->get_logger(), "Subscribed to light_command topic");
 
   RCLCPP_INFO(rclcpp::get_logger("CarlikeBotSystemHardware"), "Successfully activated!");
 
@@ -245,7 +253,14 @@ hardware_interface::CallbackReturn CarlikeBotSystemHardware::on_deactivate(
     RCLCPP_ERROR(rclcpp::get_logger("CarlikeBotSystemHardware"), "Arduino failed to disconnect.");
     return hardware_interface::CallbackReturn::ERROR;
   }
-  rclcpp::shutdown();
+  
+  // Stop spinning the light thread
+    // Stop the spinning thread
+  is_running_ = false;
+  if (spin_thread_.joinable()) {
+    spin_thread_.join();
+  }
+  
   RCLCPP_INFO(rclcpp::get_logger("CarlikeBotSystemHardware"), "Successfully deactivated!");
   return hardware_interface::CallbackReturn::SUCCESS;
 }
@@ -275,10 +290,17 @@ hardware_interface::return_type carlikebot ::CarlikeBotSystemHardware::write(
   return hardware_interface::return_type::OK;
 }
 
-void CarlikeBotSystemHardware::light_command_callback(const std_msgs::msg::String::SharedPtr msg)
+void CarlikeBotSystemHardware::light_command_callback(
+  const std_msgs::msg::String::SharedPtr msg)
 {
-  if (arduino_comm_.isConnected())
-    arduino_comm_.toggleLightState();
+  if (msg->data == "L,TOGGLE") {
+    if (arduino_comm_.isConnected()) {
+      arduino_comm_.toggleLightState();
+    } else {
+      RCLCPP_ERROR(light_control_node_->get_logger(), 
+        "Cannot toggle lights - Arduino is not connected");
+    }
+  }
 }
 
 

@@ -36,6 +36,7 @@
 #include "std_msgs/msg/string.hpp" // Include for String message
 #include "rclcpp/rclcpp.hpp" // Include for rclcpp::Node
 #include "rclcpp/subscription.hpp" // Include for creating a subscriber
+#include <thread>
 
 #include "carlikebot/arduino_comms.hpp"
 
@@ -88,7 +89,10 @@ public:
     const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
   // LIGHTS
-  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr light_command_subscription_; 
+  rclcpp::Node::SharedPtr light_control_node_;
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr light_command_subscription_;
+  std::thread spin_thread_;
+  bool is_running_;
   void light_command_callback(const std_msgs::msg::String::SharedPtr msg);
 
 private:
