@@ -32,6 +32,11 @@
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "rclcpp_lifecycle/state.hpp"
 
+// Lights
+#include "std_msgs/msg/string.hpp" // Include for String message
+#include "rclcpp/rclcpp.hpp" // Include for rclcpp::Node
+#include "rclcpp/subscription.hpp" // Include for creating a subscriber
+
 #include "carlikebot/arduino_comms.hpp"
 
 namespace carlikebot
@@ -81,6 +86,10 @@ public:
 
   hardware_interface::return_type write(
     const rclcpp::Time & time, const rclcpp::Duration & period) override;
+
+  // LIGHTS
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr light_command_subscription_; 
+  void light_command_callback(const std_msgs::msg::String::SharedPtr msg);
 
 private:
   // Parameters for the CarlikeBot simulation

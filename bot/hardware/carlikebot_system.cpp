@@ -217,6 +217,18 @@ hardware_interface::CallbackReturn CarlikeBotSystemHardware::on_activate(
     return hardware_interface::CallbackReturn::ERROR;
   }
 
+  // LIGHTS
+  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("light_control_node");
+  light_command_subscription_ = node->create_subscription<std_msgs::msg::String>(
+    "light_command", // Topic name
+    10, // Queue size
+    std::bind(&CarlikeBotSystemHardware::light_command_callback, this, std::placeholders::_1)
+  );
+  rclcpp::spin(node);
+
+  RCLCPP_INFO(node->get_logger(), "Subscribed to light_command topic");
+
+
   RCLCPP_INFO(rclcpp::get_logger("CarlikeBotSystemHardware"), "Successfully activated!");
 
   return hardware_interface::CallbackReturn::SUCCESS;
@@ -233,6 +245,7 @@ hardware_interface::CallbackReturn CarlikeBotSystemHardware::on_deactivate(
     RCLCPP_ERROR(rclcpp::get_logger("CarlikeBotSystemHardware"), "Arduino failed to disconnect.");
     return hardware_interface::CallbackReturn::ERROR;
   }
+  rclcpp::shutdown();
   RCLCPP_INFO(rclcpp::get_logger("CarlikeBotSystemHardware"), "Successfully deactivated!");
   return hardware_interface::CallbackReturn::SUCCESS;
 }
@@ -261,6 +274,13 @@ hardware_interface::return_type carlikebot ::CarlikeBotSystemHardware::write(
   arduino_comm_.setTractionVelocity(hw_interfaces_["traction"].command.velocity);
   return hardware_interface::return_type::OK;
 }
+
+void CarlikeBotSystemHardware::light_command_callback(const std_msgs::msg::String::SharedPtr msg)
+{
+  if (arduino_comm_.isConnected())
+    arduino_comm_.toggleLightState();
+}
+
 
 }  // namespace carlikebot
 
