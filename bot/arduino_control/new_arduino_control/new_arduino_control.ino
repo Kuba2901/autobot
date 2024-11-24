@@ -58,6 +58,25 @@ t_traction      traction;
 char            buffer[32];
 int             buffer_index = 0, buffer_size = 32;
 
+void  _log_success(const char *msg)
+{
+  if (Serial.availableForWrite())
+  {
+    Serial.print("OK: ");
+    Serial.print(msg);
+    Serial.print("\n");
+  }
+}
+
+void  _log_error(const char *msg)
+{
+  if (Serial.availableForWrite())
+  {
+    Serial.print("ERROR: ");
+    Serial.print(msg);
+    Serial.print("\n");
+  }
+}
 
 void setup()
 {
@@ -68,7 +87,7 @@ void setup()
   // Initialize the robot
   __setup();
 
-  Serial.println("Setup complete");
+  _log_success("Setup complete");
 }
 
 void loop()
@@ -88,9 +107,6 @@ void loop()
       
       // Reset buffer
       buffer_index = 0;
-      
-      // Send acknowledgment
-      Serial.println("OK");
     }
   }
 
@@ -104,22 +120,24 @@ void  processCommand(const char* cmd) {
   else if (!strncmp(cmd, "DISCONNECT", 10))
     __disconnect_robot();
   else if (!strncmp(cmd, "STOP", 4))
+  {
     mob_stop_motors();
-  else if (!strncmp(cmd, "OFF", 3))
-    __lig_lights_off();
-  else if (!strncmp(cmd, "START", 5))
-    __lig_lights_on();
-  if (!strncmp(cmd, "STOP", 4))
-    mob_stop_motors();
+    _log_success("Robot stopped.");
+  }
   else if (cmd[0] == 'M')
     _parse_motor_command(cmd);
   else if (cmd[0] == 'L')
     _parse_lighting_command(cmd);
   else
   {
-    Serial.println("Unrecognized command.");
     mob_stop_motors();
+    _log_error("Unrecognized command.");
   }
+}
+
+bool is_valid_lighting_command(const char *ptr)
+{
+  return (!strncmp(ptr, "OFF", 3) || !strncmp(ptr, "BLINK", 5) || !strncmp(ptr, "ON", 2) || !strncmp(ptr, "TOGGLE", 6)); 
 }
 
 void  _parse_lighting_command(const char *cmd)
@@ -128,16 +146,20 @@ void  _parse_lighting_command(const char *cmd)
   if (ptr)
   {
     ptr++;
-    Serial.print(ptr);
-    Serial.print("\n");
+    if (!is_valid_lighting_command(ptr))
+    {
+      _log_error("Unrecognized lighting command");
+      return ;
+    }
     if (!strncmp(ptr, "OFF", 3))
       __lig_lights_off();
     else if (!strncmp(ptr, "BLINK", 5))
       __lig_lights_init();
     else if (!strncmp(ptr, "ON", 2))
       __lig_lights_on();
-    else
-      Serial.println("Unrecognized lighting command");
+    else if (!strncmp(ptr, "TOGGLE", 6))
+      __lig_lights_toggle();
+    _log_success("Lighting command executed.");
   }
 }
 
@@ -159,6 +181,7 @@ void  _parse_motor_command(const char *cmd)
   // Apply commands to motors
   mob_turn(steering_pwm);
   mob_go(traction_pwm);
+  _log_success("Motor command executed.");
 }
 
 void  display_lights(void)
@@ -198,14 +221,30 @@ void  __init_robot(void)
 
   delay(300);
   __lig_lights_init();
-  Serial.println("OK: The robot has been initialized");
+  _log_success("The robot has been initialized");
 }
 
 void  __disconnect_robot(void)
 {
   __lig_lights_off();
   mob_stop_motors();
-  Serial.println("OK: The robot has disconnected");
+  _log_success("he robot has disconnected");
+}
+
+void  __lig_lights_toggle(void)
+{
+  switch (lighting.lights_state)
+  {
+    case OFF:
+      __lig_lights_init();
+      break ;
+    case BLINKING:
+      __lig_lights_on();
+      break ;
+    case ON:
+      __lig_lights_off();
+      break ;
+  }
 }
 
 // LIGHTING
@@ -213,16 +252,19 @@ void  __lig_lights_off(void)
 {
   // TODO: Fix the bug with lighting not starting at 0 brightness
   lighting.lights_state = OFF;
+  Serial.println("Lights turned off");
 }
 
 void  __lig_lights_init(void)
 {
   lighting.lights_state = BLINKING;
+  Serial.println("Lights blinking.");
 }
 
 void  __lig_lights_on(void)
 {
   lighting.lights_state = ON;
+  Serial.println("Lights turned on.");
 }
 
 void  __lig_display_init_lights(void)
@@ -338,4 +380,5 @@ void  mob_stop_motors(void)
 
   // Disable steering
   mob_steer_neutral();
+  Serial.println("Motors stopped.");
 }

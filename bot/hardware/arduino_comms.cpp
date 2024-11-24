@@ -50,9 +50,11 @@ bool ArduinoComm::connect(const std::string& serial_device, int32_t baud_rate, i
 
 void ArduinoComm::disconnect()
 {
+  std::stringstream cmd;
   if (serial_port_.IsOpen()) {
     stopMotors();
-    sendCommand("DISCONNECT");
+    cmd << "DISCONNECT" << "\n";
+    sendCommand(cmd.str());
     serial_port_.Close();
   }
 }
@@ -107,17 +109,24 @@ bool ArduinoComm::setTractionVelocity(double velocity)
   cmd << "M," << this->current_steering_pwm_ << "," << pwm << "\n";  // Format: M,<steering_pwm>,<traction_pwm>
   return sendCommand(cmd.str());
 }
+
 bool ArduinoComm::stopMotors()
 {
+  std::stringstream cmd;
   if (!isConnected()) return false;
-  return sendCommand("STOP\n");
+  cmd << "STOP" << "\n";;  // Only use \n instead of std::endl
+  return sendCommand(cmd.str());
 }
 
 bool ArduinoComm::initialize()
 {
+  std::stringstream cmd;
   if (!isConnected()) return false;
-  return sendCommand("INIT\n");
+  sleep(3);  // Wait for the Arduino to reset
+  cmd << "INIT" << "\n";  // Only use \n instead of std::endl
+  return sendCommand(cmd.str());
 }
+
 
 bool ArduinoComm::sendCommand(const std::string &cmd)
 {
@@ -141,6 +150,13 @@ bool ArduinoComm::sendCommand(const std::string &cmd)
 double ArduinoComm::mapToRange(double x, double in_min, double in_max, double out_min, double out_max)
 {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+bool ArduinoComm::toggleLightState(void) {
+  if (!isConnected()) return false;
+  std::stringstream cmd;
+  cmd << "L,TOGGLE" << "\n";
+  return sendCommand(cmd.str());
 }
 
 }  // namespace carlikebot

@@ -7,6 +7,7 @@
 #include <libserial/SerialPort.h>
 #include "rclcpp/logger.hpp"
 #include <math.h>
+#include <unistd.h>
 
 namespace carlikebot {
 
@@ -24,6 +25,9 @@ public:
   bool setTractionVelocity(double velocity);  // normalized velocity (-1.0 to 1.0)
   bool stopMotors();
   bool initialize();
+
+  // Lighting
+  bool toggleLightState(void);
 
   // ARDUINO MOTOR VALUES
   static constexpr double NEUTRAL_PWM = 127;
