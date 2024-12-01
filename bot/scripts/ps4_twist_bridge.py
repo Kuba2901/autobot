@@ -36,6 +36,14 @@ class PS4ControllerNode(Node):
 
         # Light control using Circle button (button index 1)
         circle_button = msg.buttons[1]
+        
+        # Allow turning in spot
+        if abs(self.current_angular_z) > 0.1 and self.current_linear_x == 0:
+            self.current_linear_x = 0.01
+        
+        # Fix steer inversion when reversing
+        if self.current_linear_x < 0:
+            self.current_angular_z = -self.current_angular_z
     
         # Add debug print
         self.get_logger().debug(f'Circle button state: {circle_button}')
