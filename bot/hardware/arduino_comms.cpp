@@ -123,6 +123,8 @@ bool ArduinoComm::initialize()
   std::stringstream cmd;
   if (!isConnected()) return false;
   sleep(3);  // Wait for the Arduino to reset
+  this->current_steering_pwm_ = 127;
+  this->current_traction_pwm_ = 127;
   cmd << "INIT" << "\n";  // Only use \n instead of std::endl
   return sendCommand(cmd.str());
 }
